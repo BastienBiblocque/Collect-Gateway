@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -10,7 +11,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class AppFixtures extends Fixture
 {
 
-    private $passwordHasher;
+    private UserPasswordHasherInterface $passwordHasher;
 
     public function __construct(UserPasswordHasherInterface $passwordHasher)
     {
@@ -29,7 +30,13 @@ class AppFixtures extends Fixture
         $user->setRoles(['ROLE_USER']);
 
         $manager->persist($user);
-        $manager->flush();
+
+        $product = new Product();
+        $product->setName("Product 1");
+        $product->setDescription("Product 1 description");
+        $product->setPrice(100);
+        $product->setQuantity(4);
+        $manager->persist($product);
 
         $manager->flush();
     }
