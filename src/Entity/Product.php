@@ -12,29 +12,22 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: 'integer')]
-    #[Groups(['product:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['product:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['product:read'])]
     private ?string $price = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['product:read'])]
     private ?string $quantity = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['product:read'])]
     private ?string $description = null;
 
-    #[ORM\ManyToOne(targetEntity: 'Shop', inversedBy: 'products')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['product:read'])]
-    private ?Shop $shop = null;
+    #[ORM\Column(length: 255)]
+    private ?int $shopId = null;
 
     public function getId(): ?int
     {
@@ -87,13 +80,13 @@ class Product
         $this->description = $description;
     }
 
-    public function getShop(): ?Shop
+    public function getShopId(): ?int
     {
-        return $this->shop;
+        return $this->shopId;
     }
 
-    public function setShop(?Shop $shop): void
+    public function setShopId(?int $shopId): void
     {
-        $this->shop = $shop;
+        $this->shopId = $shopId;
     }
 }

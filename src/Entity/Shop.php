@@ -13,29 +13,22 @@ class Shop
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: 'integer')]
-    #[Groups(['shop:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['shop:read'])]
     private string $name;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Groups(['shop:read'])]
     private ?string $description = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Groups(['shop:read'])]
     private ?string $address = null;
 
     #[ORM\OneToMany(targetEntity: 'Product', mappedBy: 'shop')]
-    #[Groups(['shop:read'])]
     private Collection $products;
 
-    #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'shop')]
-    #[ORM\JoinColumn(unique: true, nullable: false)] // Défini la colonne de jointure ici
-    #[Groups(['shop:read'])]
-    private ?User $creator = null;
+    #[ORM\Column(length: 255)]
+    private int $creatorId;
 
 
     public function getId(): ?int
@@ -88,13 +81,13 @@ class Shop
         $this->products = $products;
     }
 
-    public function getCreator(): ?User
+    public function getCreatorId(): int
     {
-        return $this->creator;
+        return $this->creatorId;
     }
 
-    public function setCreator(?User $creator): void
+    public function setCreatorId(int $creatorId): void
     {
-        $this->creator = $creator;
+        $this->creatorId = $creatorId;
     }
 }

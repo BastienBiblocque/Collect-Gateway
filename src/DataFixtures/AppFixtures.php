@@ -31,23 +31,23 @@ class AppFixtures extends Fixture
         $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
         $user->setRoles(['ROLE_USER']);
         $manager->persist($user);
+        $manager->flush();
 
-//        $shop = new Shop();
-//        $shop->setName($faker->company);
-//        $shop->setDescription($faker->optional()->paragraph);
-//        $shop->setAddress($faker->optional()->address);
-//        $shop->setCreator($user);
-//        $manager->persist($shop);
+        $shop = new Shop();
+        $shop->setName($faker->company);
+        $shop->setDescription($faker->optional()->paragraph);
+        $shop->setAddress($faker->optional()->address);
+        $shop->setCreatorId($user->getId());
+        $manager->persist($shop);
+        $manager->flush();
 
-
-
-//        $product = new Product();
-//        $product->setName("Product 1");
-//        $product->setDescription("Product 1 description");
-//        $product->setPrice(100);
-//        $product->setQuantity(4);
-//        $product->setShop($shop);
-//        $manager->persist($product);
+        $product = new Product();
+        $product->setName("Product 1");
+        $product->setDescription("Product 1 description");
+        $product->setPrice(100);
+        $product->setQuantity(4);
+        $product->setShopId($shop->getId());
+        $manager->persist($product);
 
         $manager->flush();
     }

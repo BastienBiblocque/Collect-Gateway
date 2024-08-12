@@ -26,9 +26,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private array $roles = [];
 
-    #[ORM\OneToOne(targetEntity: Shop::class, mappedBy: 'creator')]
-    private ?Shop $shop = null;
-
     /**
      * @var string The hashed password
      */
