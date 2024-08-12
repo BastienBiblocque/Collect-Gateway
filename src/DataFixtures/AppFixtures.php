@@ -30,6 +30,7 @@ class AppFixtures extends Fixture
         $user->setEmail("user@example.com");
         $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
         $user->setRoles(['ROLE_USER']);
+        $user->setShopId(1);
         $manager->persist($user);
         $manager->flush();
 
@@ -39,6 +40,14 @@ class AppFixtures extends Fixture
         $shop->setAddress($faker->optional()->address);
         $shop->setCreatorId($user->getId());
         $manager->persist($shop);
+        $manager->flush();
+
+        $user2 = new User();
+        $user2->setEmail("user@shop.com");
+        $user2->setPassword($this->passwordHasher->hashPassword($user, 'password'));
+        $user2->setRoles(['ROLE_USER']);
+        $user2->setShopId($shop->getId());
+        $manager->persist($user2);
         $manager->flush();
 
         $product = new Product();
