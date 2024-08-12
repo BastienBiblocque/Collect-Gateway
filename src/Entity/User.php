@@ -110,16 +110,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getShop(): ?Shop
-    {
-        return $this->shop;
-    }
-
-    public function setShop(?Shop $shop): void
-    {
-        $this->shop = $shop;
-    }
-
     public function getShopId(): ?string
     {
         return $this->shopId;
