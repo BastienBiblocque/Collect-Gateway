@@ -42,6 +42,14 @@ class AppFixtures extends Fixture
         $manager->persist($shop);
         $manager->flush();
 
+        $user2 = new User();
+        $user2->setEmail("user@shop.com");
+        $user2->setPassword($this->passwordHasher->hashPassword($user, 'password'));
+        $user2->setRoles(['ROLE_USER']);
+        $user2->setShopId($shop->getId());
+        $manager->persist($user2);
+        $manager->flush();
+
         $product = new Product();
         $product->setName("Product 1");
         $product->setDescription("Product 1 description");

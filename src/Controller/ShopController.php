@@ -5,7 +5,6 @@
 namespace App\Controller;
 
 use App\Entity\Shop;
-use App\Form\ShopType;
 use App\Repository\ShopRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -67,5 +66,22 @@ class ShopController extends AbstractController
         ];
 
         return new JsonResponse($shopData, Response::HTTP_OK);
+    }
+
+    #[Route('/{id}/customers', name: 'shop_customers', methods: ['GET'])]
+
+    public function getShopCustomers(int $id, UserRepository $userRepository, ShopRepository $shopRepository): JsonResponse
+    {
+        // Récupération de la boutique
+        $shop = $shopRepository->find($id);
+
+        if (!$shop) {
+            return $this->json(['error' => 'Shop not found'], 404);
+        }
+
+        // Récupération des utilisateurs liés à la boutique via shopId
+        $customers = $userRepository->findBy(['shopId' => $id]);
+
+        return $this->json($customers, 200);
     }
 }
