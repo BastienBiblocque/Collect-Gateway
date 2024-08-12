@@ -30,6 +30,7 @@ class AppFixtures extends Fixture
         $user->setEmail("user@example.com");
         $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
         $user->setRoles(['ROLE_USER']);
+        $user->setShopId(1);
         $manager->persist($user);
         $manager->flush();
 

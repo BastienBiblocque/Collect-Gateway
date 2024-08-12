@@ -50,4 +50,22 @@ class ShopController extends AbstractController
 
         return $this->json($shop, Response::HTTP_OK);
     }
+
+    #[Route('/user/{creatorId}', name: 'creator_shop', methods: ['GET'])]
+    public function shopByCreator(string $creatorId, ShopRepository $shopRepository, UserRepository $userRepository): JsonResponse
+    {
+        $email = base64_decode($creatorId);
+        $user = $userRepository->findOneBy(['email' => $email]);
+        $shop = $shopRepository->findOneBy(['creatorId' => $user->getId()]);
+
+        if (!$shop) {
+            return new JsonResponse(['error' => 'Shop not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $shopData = [
+            'id' => $shop->getId()
+        ];
+
+        return new JsonResponse($shopData, Response::HTTP_OK);
+    }
 }
