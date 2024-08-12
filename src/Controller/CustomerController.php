@@ -16,11 +16,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/user')]
-class UserController extends AbstractController
+#[Route('/api/public/{shopId}/customer')]
+class CustomerController extends AbstractController
 {
-    #[Route('/new', name: 'user_new', methods: ['POST'])]
-    public function new(Request $request,EntityManagerInterface $entityManager ,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator, SerializerInterface $serializer): JsonResponse
+    #[Route('/new', name: 'customer_new', methods: ['POST'])]
+    public function new(int $shopId, Request $request,EntityManagerInterface $entityManager ,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator, SerializerInterface $serializer): JsonResponse
     {
         $data = $request->getContent();
         $userDTO = $serializer->deserialize($data, UserDTO::class, 'json');
@@ -40,6 +40,7 @@ class UserController extends AbstractController
         $user = new User();
         $user->setEmail($userDTO->email);
         $user->setRoles(['ROLE_USER']);
+        $user->setShopId($shopId);
         $user->setPassword($passwordHasher->hashPassword($user, $userDTO->password));
 
         $entityManager->persist($user);
