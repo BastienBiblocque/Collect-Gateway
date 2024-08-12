@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -19,11 +20,8 @@ class ProductController extends AbstractController
     #[Route('/', name: 'product_index', methods: ['GET'])]
     public function index(int $shopId, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
-        $products = $productRepository->findBy(['shop' => $shopId]);
-
-        $data = $serializer->serialize($products, 'json', ['groups' => ['product:read']]);
-
-        return new JsonResponse($data, 200, [], true);
+        $products = $productRepository->findBy(['shopId' => $shopId]);
+        return $this->json($products, Response::HTTP_OK);
     }
 
     #[Route('/new', name: 'product_new', methods: ['POST'])]
@@ -37,14 +35,12 @@ class ProductController extends AbstractController
         $product->setDescription($data['description'] ?? null);
         $shop = $shopRepository->find($shopId);
 
-        $product->setShop($shop);
+        $product->setShopId($shop);
 
         $entityManager->persist($product);
         $entityManager->flush();
 
-        $data = $serializer->serialize($product, 'json', ['groups' => ['product:read']]);
-
-        return new JsonResponse($data, 200, [], true);
+        return $this->json($product, Response::HTTP_OK);
     }
 
 }
