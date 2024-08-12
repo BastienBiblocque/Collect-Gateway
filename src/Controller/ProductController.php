@@ -88,8 +88,6 @@ class ProductController extends AbstractController
         try {
             $entityManager->persist($product);
             $entityManager->flush();
-            return $this->json($product, Response::HTTP_OK);
-
             return new JsonResponse(['message' => 'Product updated successfully'], Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'An error occurred while updating the product'], Response::HTTP_INTERNAL_SERVER_ERROR);

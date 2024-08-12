@@ -32,6 +32,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ORM\Column]
+    private ?string $shopId = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -115,5 +118,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setShop(?Shop $shop): void
     {
         $this->shop = $shop;
+    }
+
+    public function getShopId(): ?string
+    {
+        return $this->shopId;
+    }
+
+    public function setShopId(?string $shopId): void
+    {
+        $this->shopId = $shopId;
     }
 }
