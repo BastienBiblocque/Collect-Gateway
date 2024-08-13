@@ -47,7 +47,7 @@ class AddressController extends AbstractController
         $deliveryAdress->setLastname($data['delivery']['lastname'] ?? '');
         $entityManager->persist($deliveryAdress);
 
-        if (isset($data['usebilling'])) {
+        if (!isset($data['usebilling'])) {
             $address = new Address();
             $address->setStreet($data['billing']['street']);
             $address->setCity($data['billing']['city']);

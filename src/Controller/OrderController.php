@@ -10,15 +10,12 @@ use App\Repository\AddressRepository;
 use App\Repository\CartProductRepository;
 use App\Repository\CartRepository;
 use App\Repository\OrderRepository;
-use App\Repository\ProductRepository;
-use App\Repository\ShopRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/private/{shopId}/order')]
 class OrderController extends AbstractController
@@ -27,6 +24,37 @@ class OrderController extends AbstractController
     public function index(string $shopId, OrderRepository $orderRepository): JsonResponse
     {
         $orders = $orderRepository->findBy(['shopId' => $shopId]);
+
+        return $this->json($orders, Response::HTTP_OK);
+    }
+
+    #[Route('/{userId}', name: 'order_index', methods: ['GET'])]
+    public function getByUser(string $shopId, string $userId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
+    {
+        $orders = $orderRepository->findBy(['shopId' => $shopId, 'userId' => $userId]);
+
+        foreach ($orders as $order) {
+            $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
+
+            $cartProducts = $cartProductRepository->findBy(['cartId' => $cart->getId()]);
+
+            $cartDetails = [];
+            $total = 0;
+
+            foreach ($cartProducts as $cartProduct) {
+                $cartDetails[] = $cartProduct;
+                $total += $cartProduct->getPrice();
+            }
+
+            $cart->setProducts($cartDetails);
+
+            $cart->setTotalPrice($total);
+
+            $order->setCart($cart);
+
+            $order->setDeliveryAddress($addressRepository->find($order->getDevelieryId()));
+            $order->setBillingAddress($addressRepository->find($order->getBillingId()));
+        }
 
         return $this->json($orders, Response::HTTP_OK);
     }
@@ -67,6 +95,7 @@ class OrderController extends AbstractController
         $order->setCartId($data['cartId']);
         $order->setBillingId($data['billing']);
         $order->setDevelieryId($data['delivery']);
+        $order->setCreatedAt(new \DateTime());
         $entityManager->persist($order);
 
         $entityManager->flush();

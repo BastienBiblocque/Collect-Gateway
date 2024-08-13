@@ -32,10 +32,14 @@ class Order
     #[ORM\Column(length: 255)]
     private string $shopId;
 
+    #[ORM\Column()]
+
+    private \DateTime $createdAt;
     private ?Cart $cart = null;
 
     private ?Address $billingAddress = null;
     private ?Address $deliveryAddress = null;
+
 
     public function getId(): ?int
     {
@@ -140,5 +144,15 @@ class Order
     public function setDeliveryAddress(?Address $deliveryAddress): void
     {
         $this->deliveryAddress = $deliveryAddress;
+    }
+
+    public function getCreatedAt(): \DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): void
+    {
+        $this->createdAt = $createdAt;
     }
 }

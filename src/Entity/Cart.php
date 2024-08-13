@@ -29,6 +29,8 @@ class Cart
 
     private array $products = [];
 
+    private int $totalPrice = 0;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,5 +92,15 @@ class Cart
     public function setProducts(array $products): void
     {
         $this->products = $products;
+    }
+
+    public function getTotalPrice(): int
+    {
+        return $this->totalPrice;
+    }
+
+    public function setTotalPrice(int $totalPrice): void
+    {
+        $this->totalPrice = $totalPrice;
     }
 }

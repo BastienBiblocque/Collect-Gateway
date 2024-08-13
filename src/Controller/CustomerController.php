@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class CustomerController extends AbstractController
 {
     #[Route('/new', name: 'customer_new', methods: ['POST'])]
-    public function new(int $shopId, Request $request,EntityManagerInterface $entityManager ,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator, SerializerInterface $serializer): JsonResponse
+    public function new(int $shopId, Request $request, EntityManagerInterface $entityManager ,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator, SerializerInterface $serializer): JsonResponse
     {
         $data = $request->getContent();
         $userDTO = $serializer->deserialize($data, UserDTO::class, 'json');
