@@ -82,6 +82,10 @@ class ShopController extends AbstractController
         // Récupération des utilisateurs liés à la boutique via shopId
         $customers = $userRepository->findBy(['shopId' => $id]);
 
+        foreach ($customers as $key => $customer) {
+            $customer->setPassword('');
+        }
+
         return $this->json($customers, 200);
     }
 }
