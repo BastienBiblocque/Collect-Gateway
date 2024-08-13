@@ -24,9 +24,6 @@ class Shop
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $address = null;
 
-    #[ORM\OneToMany(targetEntity: 'Product', mappedBy: 'shop')]
-    private Collection $products;
-
     #[ORM\Column(length: 255)]
     private int $creatorId;
 
@@ -69,16 +66,6 @@ class Shop
     public function setAddress(?string $address): void
     {
         $this->address = $address;
-    }
-
-    public function getProducts(): Collection
-    {
-        return $this->products;
-    }
-
-    public function setProducts(Collection $products): void
-    {
-        $this->products = $products;
     }
 
     public function getCreatorId(): int
