@@ -30,7 +30,7 @@ class UserController extends AbstractController
             return $this->json($errors, Response::HTTP_BAD_REQUEST);
         }
 
-        $existingUser = $userRepository->findOneBy(['email' => $userDTO->email]);
+        $existingUser = $userRepository->findOneBy(['email' => $userDTO->getEmail()]);
         if ($existingUser) {
             return $this->json([
                 'error' => 'Un utilisateur avec cet email existe déjà.'
@@ -38,9 +38,9 @@ class UserController extends AbstractController
         }
 
         $user = new User();
-        $user->setEmail($userDTO->email);
+        $user->setEmail($userDTO->getEmail());
         $user->setRoles(['ROLE_USER']);
-        $user->setPassword($passwordHasher->hashPassword($user, $userDTO->password));
+        $user->setPassword($passwordHasher->hashPassword($user, $userDTO->getPassword()));
 
         $entityManager->persist($user);
         $entityManager->flush();

@@ -30,15 +30,15 @@ class AppFixtures extends Fixture
         $user->setEmail("user@example.com");
         $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
         $user->setRoles(['ROLE_USER']);
-        $user->setShopId(1);
         $manager->persist($user);
         $manager->flush();
 
         $shop = new Shop();
         $shop->setName($faker->company);
         $shop->setDescription($faker->optional()->paragraph);
-        $shop->setAddress($faker->optional()->address);
         $shop->setCreatorId($user->getId());
+        $shop->setSiretNumber(12345678901234);
+        $shop->setTheme($faker->optional()->word());
         $manager->persist($shop);
         $manager->flush();
 
