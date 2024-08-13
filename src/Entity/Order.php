@@ -6,7 +6,7 @@ use App\Repository\OrderRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
-#[ORM\Table(name: '`order`')]
+#[ORM\Table(name: 'orders')]
 class Order
 {
     #[ORM\Id]
@@ -39,6 +39,8 @@ class Order
 
     private ?Address $billingAddress = null;
     private ?Address $deliveryAddress = null;
+
+    private ?User $user = null;
 
 
     public function getId(): ?int
@@ -154,5 +156,15 @@ class Order
     public function setCreatedAt(\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): void
+    {
+        $this->user = $user;
     }
 }

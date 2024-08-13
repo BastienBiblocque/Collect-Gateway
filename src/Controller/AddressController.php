@@ -22,7 +22,7 @@ class AddressController extends AbstractController
     #[Route('/', name: 'address_index', methods: ['GET'])]
     public function index(string $shopId, string $userId, AddressRepository $addressRepository): JsonResponse
     {
-        $address = $addressRepository->findBy(['userId' => $userId, 'shopId' => $shopId]);
+        $address = $addressRepository->findBy(['userId' => base64_decode($userId), 'shopId' => $shopId]);
 
         return $this->json($address, Response::HTTP_OK);
     }
@@ -41,7 +41,7 @@ class AddressController extends AbstractController
         $deliveryAdress->setCity($data['delivery']['city']);
         $deliveryAdress->setZipcode($data['delivery']['zipcode']);
         $deliveryAdress->setCountry($data['delivery']['country'] ?? 'France');
-        $deliveryAdress->setUserId($userId);
+        $deliveryAdress->setUserId(base64_decode($userId));
         $deliveryAdress->setShopId($shopId);
         $deliveryAdress->setFirstname($data['delivery']['firstname'] ?? '');
         $deliveryAdress->setLastname($data['delivery']['lastname'] ?? '');
@@ -55,7 +55,7 @@ class AddressController extends AbstractController
             $address->setCountry($data['billing']['country'] ?? 'France');
             $address->setFirstname($data['billing']['firstname']);
             $address->setLastname($data['billing']['lastname']);
-            $address->setUserId($userId);
+            $address->setUserId(base64_decode($userId));
             $address->setShopId($shopId);
             $entityManager->persist($address);
         }

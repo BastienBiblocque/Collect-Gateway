@@ -10,6 +10,7 @@ use App\Repository\AddressRepository;
 use App\Repository\CartProductRepository;
 use App\Repository\CartRepository;
 use App\Repository\OrderRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class OrderController extends AbstractController
 {
     #[Route('/', name: 'order_byshop', methods: ['GET'])]
-    public function getByShop(string $shopId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
+    public function getByShop(string $shopId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository, UserRepository $userRepository): JsonResponse
     {
         $orders = $orderRepository->findBy(['shopId' => $shopId]);
 
@@ -44,6 +45,9 @@ class OrderController extends AbstractController
 
             $order->setCart($cart);
 
+            $user = $userRepository->findOneBy(['id' => $order->getUserId()]);
+            $order->setUser($user);
+
             $order->setDeliveryAddress($addressRepository->find($order->getDevelieryId()));
             $order->setBillingAddress($addressRepository->find($order->getBillingId()));
         }
@@ -54,7 +58,7 @@ class OrderController extends AbstractController
     #[Route('/{userId}', name: 'order_index', methods: ['GET'])]
     public function getByUser(string $shopId, string $userId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
     {
-        $orders = $orderRepository->findBy(['shopId' => $shopId, 'userId' => $userId]);
+        $orders = $orderRepository->findBy(['shopId' => $shopId, 'userId' => base64_decode($userId)]);
 
         foreach ($orders as $order) {
             $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
@@ -87,7 +91,7 @@ class OrderController extends AbstractController
     #[Route('/{userId}/{orderId}', name: 'order_getOne', methods: ['GET'])]
     public function getOne(string $shopId, string $userId , string $orderId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
     {
-        $order = $orderRepository->findOneBy(['shopId' => $shopId, 'userId' => $userId, 'id' => $orderId]);
+        $order = $orderRepository->findOneBy(['shopId' => $shopId, 'userId' =>  base64_decode($userId), 'id' => $orderId]);
 
         $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
 
@@ -115,7 +119,7 @@ class OrderController extends AbstractController
 
         $order = new Order();
         $order->setStatus('open');
-        $order->setUserId($userId);
+        $order->setUserId(base64_decode($userId));
         $order->setShopId($shopId);
         $order->setCartId($data['cartId']);
         $order->setBillingId($data['billing']);
@@ -131,7 +135,7 @@ class OrderController extends AbstractController
     #[Route('/{userId}/{orderId}/payed', name: 'order_pay', methods: ['PUT'])]
     public function payOrder(string $shopId, string $userId, string $orderId, OrderRepository $orderRepository, EntityManagerInterface $entityManager, CartRepository $cartRepository): JsonResponse
     {
-        $order = $orderRepository->findOneBy(['userId' => $userId, 'shopId' => $shopId, 'id' => $orderId]);
+        $order = $orderRepository->findOneBy(['userId' => base64_decode($userId), 'shopId' => $shopId, 'id' => $orderId]);
         $order->setStatus('payed');
 
         $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
@@ -140,6 +144,18 @@ class OrderController extends AbstractController
         $entityManager->persist($order);
         $entityManager->persist($cart);
 
+        $entityManager->flush();
+
+        return $this->json($order, Response::HTTP_OK);
+    }
+
+    #[Route('/send/{orderId}', name: 'order_send', methods: ['POST'])]
+    public function sendOrder(string $shopId, string $orderId, OrderRepository $orderRepository, EntityManagerInterface $entityManager,): JsonResponse
+    {
+        $order = $orderRepository->findOneBy(['shopId' => $shopId, 'id' => $orderId]);
+        $order->setStatus('send');
+
+        $entityManager->persist($order);
         $entityManager->flush();
 
         return $this->json($order, Response::HTTP_OK);
