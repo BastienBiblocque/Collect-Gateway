@@ -42,9 +42,13 @@ class CustomerController extends AbstractController
         $user->setRoles(['ROLE_USER']);
         $user->setShopId($shopId);
         $user->setPassword($passwordHasher->hashPassword($user, $userDTO->getPassword()));
+        $user->setFirstname($userDTO->getFirstname());
+        $user->setLastname($userDTO->getLastname());
 
         $entityManager->persist($user);
         $entityManager->flush();
+
+        $user->setPassword('');
 
         return $this->json($user, Response::HTTP_CREATED);
     }
