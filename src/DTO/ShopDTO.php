@@ -1,53 +1,45 @@
 <?php
 
-namespace App\Entity;
+namespace App\DTO;
 
-use App\Repository\ShopRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: ShopRepository::class)]
-class Shop
+class ShopDTO
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id', type: 'integer')]
+    /**
+     * @Assert\NotBlank()
+     */
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    /**
+     * @Assert\NotBlank()
+     * @Assert\Length(max=255)
+     */
     private string $name;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
     private ?string $addressId = null;
 
-    #[ORM\Column(length: 255)]
-    private int $creatorId;
+    /**
+     * @Assert\NotBlank()
+     */
+    private int $creator;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
     private ?string $paymentId = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $activitySector = null;
 
-    #[ORM\Column(type: 'string', length: 14, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Length(
-        min: 14,
-        max: 14,
-        exactMessage: 'Le numéro SIRET doit comporter exactement {{ limit }} chiffres.'
-    )]
-    #[Assert\Regex(
-        pattern: '/^\d{14}$/',
-        message: 'Le numéro SIRET doit être composé uniquement de 14 chiffres.'
-    )]
+    /**
+     * @Assert\NotBlank()
+     * @Assert\Length(min=14, max=14, exactMessage="Le numéro SIRET doit comporter exactement 14 chiffres.")
+     * @Assert\Regex(pattern="/^\d{14}$/", message="Le numéro SIRET doit être composé uniquement de 14 chiffres.")
+     */
     private ?string $siretNumber = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $theme = null;
 
+    // Getters and Setters
 
     public function getId(): ?int
     {
@@ -89,14 +81,14 @@ class Shop
         $this->addressId = $addressId;
     }
 
-    public function getCreatorId(): int
+    public function getCreator(): int
     {
-        return $this->creatorId;
+        return $this->creator;
     }
 
-    public function setCreatorId(int $creatorId): void
+    public function setCreator(int $creator): void
     {
-        $this->creatorId = $creatorId;
+        $this->creator = $creator;
     }
 
     public function getPaymentId(): ?string
@@ -109,12 +101,12 @@ class Shop
         $this->paymentId = $paymentId;
     }
 
-    public function getActivitySector(): string
+    public function getActivitySector(): ?string
     {
         return $this->activitySector;
     }
 
-    public function setActivitySector(string $activitySector): void
+    public function setActivitySector(?string $activitySector): void
     {
         $this->activitySector = $activitySector;
     }
@@ -129,13 +121,14 @@ class Shop
         $this->siretNumber = $siretNumber;
     }
 
-    public function getTheme(): string
+    public function getTheme(): ?string
     {
         return $this->theme;
     }
 
-    public function setTheme(string $theme): void
+    public function setTheme(?string $theme): void
     {
         $this->theme = $theme;
     }
+
 }
