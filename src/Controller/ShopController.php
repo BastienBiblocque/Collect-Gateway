@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\ShopDTO;
 use App\Entity\Shop;
+use App\Repository\OrderRepository;
 use App\Repository\ShopRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -87,7 +88,6 @@ class ShopController extends AbstractController
     }
 
     #[Route('/{id}/customers', name: 'shop_customers', methods: ['GET'])]
-
     public function getShopCustomers(int $id, UserRepository $userRepository, ShopRepository $shopRepository): JsonResponse
     {
         // Récupération de la boutique
