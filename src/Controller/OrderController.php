@@ -20,10 +20,33 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/private/{shopId}/order')]
 class OrderController extends AbstractController
 {
-    #[Route('/', name: 'order_index', methods: ['GET'])]
-    public function index(string $shopId, OrderRepository $orderRepository): JsonResponse
+    #[Route('/', name: 'order_byshop', methods: ['GET'])]
+    public function getByShop(string $shopId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
     {
         $orders = $orderRepository->findBy(['shopId' => $shopId]);
+
+        foreach ($orders as $order) {
+            $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
+
+            $cartProducts = $cartProductRepository->findBy(['cartId' => $cart->getId()]);
+
+            $cartDetails = [];
+            $total = 0;
+
+            foreach ($cartProducts as $cartProduct) {
+                $cartDetails[] = $cartProduct;
+                $total += $cartProduct->getPrice();
+            }
+
+            $cart->setProducts($cartDetails);
+
+            $cart->setTotalPrice($total);
+
+            $order->setCart($cart);
+
+            $order->setDeliveryAddress($addressRepository->find($order->getDevelieryId()));
+            $order->setBillingAddress($addressRepository->find($order->getBillingId()));
+        }
 
         return $this->json($orders, Response::HTTP_OK);
     }
@@ -58,6 +81,8 @@ class OrderController extends AbstractController
 
         return $this->json($orders, Response::HTTP_OK);
     }
+
+
 
     #[Route('/{userId}/{orderId}', name: 'order_getOne', methods: ['GET'])]
     public function getOne(string $shopId, string $userId , string $orderId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
