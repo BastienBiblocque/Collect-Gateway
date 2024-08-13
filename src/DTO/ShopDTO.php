@@ -24,7 +24,7 @@ class ShopDTO
     /**
      * @Assert\NotBlank()
      */
-    private int $creator;
+    private string $creator;
 
     private ?string $paymentId = null;
 
@@ -81,12 +81,12 @@ class ShopDTO
         $this->addressId = $addressId;
     }
 
-    public function getCreator(): int
+    public function getCreator(): string
     {
         return $this->creator;
     }
 
-    public function setCreator(int $creator): void
+    public function setCreator(string $creator): void
     {
         $this->creator = $creator;
     }

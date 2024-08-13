@@ -40,7 +40,7 @@ class AppFixtures extends Fixture
         $shop->setDescription($faker->optional()->paragraph);
         $shop->setCreatorId($user->getId());
         $shop->setSiretNumber(12345678901234);
-        $shop->setTheme($faker->optional()->word());
+        $shop->setTheme('light');
         $manager->persist($shop);
         $manager->flush();
 

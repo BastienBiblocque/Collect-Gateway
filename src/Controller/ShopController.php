@@ -57,11 +57,9 @@ class ShopController extends AbstractController
         $shop->setName($shopDTO->getName());
         $shop->setCreatorId($shopDTO->getCreator());
 
-        $siretNumber = '';
-        for ($i = 0; $i < 14; $i++) {
-            $siretNumber .= random_int(0, 9);
-        }
-        $shop->setSiretNumber($siretNumber);
+        $shop->setSiretNumber($shopDTO->getSiretNumber());
+        $shop->setTheme($shopDTO->getTheme());
+
 
         $entityManager->persist($shop);
         $entityManager->flush();
