@@ -25,6 +25,10 @@ class Address
     #[ORM\Column(length: 255)]
     private ?string $country = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $firstname = null;
+    #[ORM\Column(length: 255)]
+    private ?string $lastname = null;
     #[ORM\Column]
     private string $userId;
 
@@ -100,5 +104,25 @@ class Address
     public function setShopId(string $shopId): void
     {
         $this->shopId = $shopId;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(?string $firstname): void
+    {
+        $this->firstname = $firstname;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(?string $lastname): void
+    {
+        $this->lastname = $lastname;
     }
 }

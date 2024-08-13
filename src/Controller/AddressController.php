@@ -43,14 +43,18 @@ class AddressController extends AbstractController
         $deliveryAdress->setCountry($data['delivery']['country'] ?? 'France');
         $deliveryAdress->setUserId($userId);
         $deliveryAdress->setShopId($shopId);
+        $deliveryAdress->setFirstname($data['delivery']['firstname'] ?? '');
+        $deliveryAdress->setLastname($data['delivery']['lastname'] ?? '');
         $entityManager->persist($deliveryAdress);
 
-        if ($data['usebilling'] === false) {
+        if (isset($data['usebilling'])) {
             $address = new Address();
             $address->setStreet($data['billing']['street']);
             $address->setCity($data['billing']['city']);
             $address->setZipcode($data['billing']['zipcode']);
             $address->setCountry($data['billing']['country'] ?? 'France');
+            $address->setFirstname($data['billing']['firstname']);
+            $address->setLastname($data['billing']['lastname']);
             $address->setUserId($userId);
             $address->setShopId($shopId);
             $entityManager->persist($address);
