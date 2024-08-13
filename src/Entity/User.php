@@ -20,6 +20,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?string $shopId = null;
+
     /**
      * @var list<string> The user roles
      */
@@ -31,9 +34,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
-
-    #[ORM\Column]
-    private ?string $shopId = null;
 
     public function getId(): ?int
     {
@@ -119,4 +119,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->shopId = $shopId;
     }
+
 }
