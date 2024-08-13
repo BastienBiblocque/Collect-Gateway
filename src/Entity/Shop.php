@@ -25,7 +25,7 @@ class Shop
 
 
     #[ORM\Column(length: 255)]
-    private int $creatorId;
+    private string $creatorId;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?string $paymentId = null;
@@ -90,13 +90,12 @@ class Shop
         $this->addressId = $addressId;
     }
 
-    public function getCreatorId(): int
-
+    public function getCreatorId(): string
     {
         return $this->creatorId;
     }
 
-    public function setCreatorId(int $creatorId): void
+    public function setCreatorId(string $creatorId): void
     {
         $this->creatorId = $creatorId;
     }

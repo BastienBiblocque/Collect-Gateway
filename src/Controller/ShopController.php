@@ -55,13 +55,11 @@ class ShopController extends AbstractController
 
         $shop = new Shop();
         $shop->setName($shopDTO->getName());
-        $shop->setCreatorId($shopDTO->getCreator());
+        $shop->setCreatorId(base64_decode($shopDTO->getCreator()));
 
-        $siretNumber = '';
-        for ($i = 0; $i < 14; $i++) {
-            $siretNumber .= random_int(0, 9);
-        }
-        $shop->setSiretNumber($siretNumber);
+        $shop->setSiretNumber($shopDTO->getSiretNumber());
+        $shop->setTheme($shopDTO->getTheme());
+
 
         $entityManager->persist($shop);
         $entityManager->flush();
@@ -74,14 +72,15 @@ class ShopController extends AbstractController
     {
         $email = base64_decode($creatorId);
         $user = $userRepository->findOneBy(['email' => $email]);
-        $shop = $shopRepository->findOneBy(['creatorId' => $user->getId()]);
+        $shop = $shopRepository->findOneBy(['creatorId' => $user->getEmail()]);
 
         if (!$shop) {
             return new JsonResponse(['error' => 'Shop not found'], Response::HTTP_NOT_FOUND);
         }
 
         $shopData = [
-            'id' => $shop->getId()
+            'id' => $shop->getId(),
+            'name' => $shop->getName(),
         ];
 
         return new JsonResponse($shopData, Response::HTTP_OK);
