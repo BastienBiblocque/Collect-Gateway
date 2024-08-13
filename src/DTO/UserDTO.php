@@ -25,6 +25,16 @@ class UserDTO
      */
     private ?string $password = null;
 
+    /**
+     * @Assert\NotBlank()
+     */
+    private ?string $firstname = null;
+
+    /**
+     * @Assert\NotBlank()
+     */
+    private ?string $lastname = null;
+
     // Getters and Setters
 
     public function getEmail(): ?string
@@ -65,5 +75,25 @@ class UserDTO
     public function setPassword(?string $password): void
     {
         $this->password = $password;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(?string $firstname): void
+    {
+        $this->firstname = $firstname;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(?string $lastname): void
+    {
+        $this->lastname = $lastname;
     }
 }

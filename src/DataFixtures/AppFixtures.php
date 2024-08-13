@@ -30,6 +30,8 @@ class AppFixtures extends Fixture
         $user->setEmail("user@example.com");
         $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
         $user->setRoles(['ROLE_USER']);
+        $user->setFirstname("baba");
+        $user->setLastname("bibi");
         $manager->persist($user);
         $manager->flush();
 
@@ -46,6 +48,8 @@ class AppFixtures extends Fixture
         $user2->setEmail("user@shop.com");
         $user2->setPassword($this->passwordHasher->hashPassword($user, 'password'));
         $user2->setRoles(['ROLE_USER']);
+        $user->setFirstname("Mu");
+        $user->setLastname("Mei");
         $user2->setShopId($shop->getId());
         $manager->persist($user2);
         $manager->flush();
