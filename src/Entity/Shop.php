@@ -23,6 +23,7 @@ class Shop
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?string $addressId = null;
 
+
     #[ORM\Column(length: 255)]
     private int $creatorId;
 
@@ -90,6 +91,7 @@ class Shop
     }
 
     public function getCreatorId(): int
+
     {
         return $this->creatorId;
     }
