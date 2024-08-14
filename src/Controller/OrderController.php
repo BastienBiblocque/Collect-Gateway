@@ -10,6 +10,7 @@ use App\Repository\AddressRepository;
 use App\Repository\CartProductRepository;
 use App\Repository\CartRepository;
 use App\Repository\OrderRepository;
+use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -133,12 +134,37 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{userId}/{orderId}/payed', name: 'order_pay', methods: ['PUT'])]
-    public function payOrder(string $shopId, string $userId, string $orderId, OrderRepository $orderRepository, EntityManagerInterface $entityManager, CartRepository $cartRepository): JsonResponse
+    public function payOrder(string $shopId, string $userId, string $orderId, OrderRepository $orderRepository, EntityManagerInterface $entityManager, CartRepository $cartRepository, CartProductRepository $cartProductRepository, ProductRepository $productRepository): JsonResponse
     {
         $order = $orderRepository->findOneBy(['userId' => base64_decode($userId), 'shopId' => $shopId, 'id' => $orderId]);
         $order->setStatus('payed');
 
         $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
+        $cartProducts = $cartProductRepository->findBy(['cartId' => $cart->getId()]);
+        $orderArray = [];
+
+        foreach ($cartProducts as $cartProduct) {
+            $productId = $cartProduct->getProductId();
+            $orderArray[$productId] += 1;
+        }
+
+        foreach ($orderArray as $productId => $count) {
+            $product = $productRepository->findOneBy(['id' => $productId]);
+            if(!$product) {
+                return new JsonResponse(
+                    ['error' => 'Product unavailable'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            $quantityAvailable = $product->getQuantity();
+            if($quantityAvailable<$count) {
+                return new JsonResponse(
+                    ['error' => 'Product unavailable in required quantity'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+        }
+
         $cart->setStatus('payed');
 
         $entityManager->persist($order);
