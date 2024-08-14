@@ -1,16 +1,32 @@
+version: '3.8'
+
 services:
-  db:
-    image: mysql:8.0
-    container_name: my_mysql_db
+  mysql-gateway:
+    image: mysql:latest
+    container_name: mysql_db1_gateway
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: my_database
-      MYSQL_USER: my_user
-      MYSQL_PASSWORD: my_password
+      MYSQL_ROOT_PASSWORD: rootpassword1
+      MYSQL_DATABASE: database_gateway
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: password1
     ports:
       - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
+    networks:
+      - mysql-network
 
-volumes:
-  mysql_data:
+  mysql-ms-deployment:
+    image: mysql:latest
+    container_name: mysql_db2_deployment
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword2
+      MYSQL_DATABASE: database_ms_deployment
+      MYSQL_USER: user2
+      MYSQL_PASSWORD: password2
+    ports:
+      - "3307:3306"
+    networks:
+      - mysql-network
+
+networks:
+  mysql-network:
+    driver: bridge

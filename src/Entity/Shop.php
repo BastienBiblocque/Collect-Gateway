@@ -139,4 +139,19 @@ class Shop
     {
         $this->theme = $theme;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'addressId' => $this->addressId,
+            'creatorId' => $this->creatorId,
+            'paymentId' => $this->paymentId,
+            'activitySector' => $this->activitySector,
+            'siretNumber' => $this->siretNumber,
+            'theme' => $this->theme,
+        ];
+    }
 }
