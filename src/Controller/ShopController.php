@@ -24,7 +24,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ShopController extends AbstractController
 {
     #[Route('/', name: 'get_shop', methods: ['GET'])]
-
     public function getAllShops(ShopRepository $shopRepository): JsonResponse
     {
         $shops = $shopRepository->findAll();
@@ -46,6 +45,7 @@ class ShopController extends AbstractController
 
             // Décoder le contenu JSON si nécessaire
             $data = json_decode($content, true);
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return new Response('Failed to decode JSON response', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
@@ -152,5 +152,14 @@ class ShopController extends AbstractController
             ],
             Response::HTTP_OK
         );
+
+    #[Route('/{shopId}/owner', name: 'user_getOne', methods: ['GET'])]
+    public function getOwnerData(string $shopId, UserRepository $userRepository, ShopRepository $shopRepository): JsonResponse
+    {
+        $shop = $shopRepository->find($shopId);
+        $user = $userRepository->findOneBy(['email' => $shop->getCreatorId()]);
+        $user->setPassword('');
+
+        return $this->json(['shop' => $shop, 'owner' => $user], Response::HTTP_CREATED);
     }
 }
