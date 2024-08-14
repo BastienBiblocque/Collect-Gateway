@@ -56,7 +56,7 @@ class OrderController extends AbstractController
         return $this->json($orders, Response::HTTP_OK);
     }
 
-    #[Route('/paid', name: 'order_byshop', methods: ['GET'])]
+    #[Route('/paid', name: 'order_paidbyshop', methods: ['GET'])]
     public function getPaidOrderByShop(string $shopId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository, UserRepository $userRepository): JsonResponse
     {
         $orders = $orderRepository->findBy(['shopId' => $shopId, 'status' => 'payed']);
@@ -152,7 +152,11 @@ class OrderController extends AbstractController
 
         foreach ($cartProducts as $cartProduct) {
             $productId = $cartProduct->getProductId();
-            $orderArray[$productId] += 1;
+            if (array_key_exists($productId, $orderArray)) {
+                $orderArray[$productId] += 1;
+            } else {
+                $orderArray[$productId] = 1;
+            }
         }
 
         foreach ($orderArray as $productId => $count) {
@@ -170,6 +174,8 @@ class OrderController extends AbstractController
                     Response::HTTP_BAD_REQUEST
                 );
             }
+            $product->setQuantity($product->getQuantity() - $count);
+            $entityManager->persist($product);
         }
 
         $cart->setStatus('payed');

@@ -133,7 +133,7 @@ class ShopController extends AbstractController
         return $this->json($customers, 200);
     }
 
-    #[Route('/stats', name: 'order_byshop', methods: ['GET'])]
+    #[Route('/{shopId}/stats', name: 'order_stats', methods: ['GET'])]
     public function getShopStats(string $shopId, OrderRepository $orderRepository): JsonResponse
     {
         $orders = $orderRepository->findBy(['shopId' => $shopId, 'status' => ['payed', 'send']]);
@@ -150,8 +150,8 @@ class ShopController extends AbstractController
             $stats = [
                 "totalOrders" => $totalOrders,
             ],
-            Response::HTTP_OK
-        );
+            Response::HTTP_OK);
+    }
 
     #[Route('/{shopId}/owner', name: 'user_getOne', methods: ['GET'])]
     public function getOwnerData(string $shopId, UserRepository $userRepository, ShopRepository $shopRepository): JsonResponse
