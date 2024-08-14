@@ -31,7 +31,7 @@ class ShopController extends AbstractController
         return $this->json($shops, Response::HTTP_OK);
     }
 
-    #[Route('/deploy/{shopId}', name: 'deploy_shop', methods: ['GET'])]
+    #[Route('/deploy/{shopId}', name: 'deploy_shop', methods: ['POST'])]
 
     public function deploy(int $shopId, ShopRepository $shopRepository, DeploymentService $deploymentService): Response
     {
