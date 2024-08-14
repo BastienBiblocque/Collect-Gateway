@@ -76,104 +76,200 @@ class ShopControllerTest extends WebTestCase
         $this->assertIsArray($shops);
     }
 //TODO Fix Commented Test
+    public function testCreateShop(): void
+    {
+        $userId = $this->createTestUser();
 
-//    public function testCreateShop(): void
-//    {
-//        $userId = $this->createTestUser();
-//
-//        $data = [
-//            'name' => 'New Shop',
-//            'creator' => $userId, // Utilisez l'ID de l'utilisateur comme créateur
-//        ];
-//
-//        self::$client->request(
-//            'POST',
-//            '/api/private/shop/new',
-//            [],
-//            [],
-//            $this->getAuthHeaders(),
-//            json_encode($data)
-//        );
-//
-//        $response = self::$client->getResponse();
-//        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), 'Failed to create shop: ' . $response->getContent());
-//        $this->assertJson($response->getContent());
-//
-//        $shop = json_decode($response->getContent(), true);
-//        $this->assertArrayHasKey('id', $shop);
-//    }
-//
-//    public function testCreateShopConflict(): void
-//    {
-//        $userId = $this->createTestUser();
-//
-//        $shopName = 'Existing Shop Name'; // Assurez-vous que ce nom existe déjà dans la base de données
-//        $data = [
-//            'name' => $shopName,
-//            'creator' => $userId,
-//        ];
-//
-//        self::$client->request(
-//            'POST',
-//            '/api/private/shop/new',
-//            [],
-//            [],
-//            $this->getAuthHeaders(),
-//            json_encode($data)
-//        );
-//
-//        $response = self::$client->getResponse();
-//        $this->assertEquals(Response::HTTP_CONFLICT, $response->getStatusCode(), 'Expected conflict but got: ' . $response->getContent());
-//        $this->assertJson($response->getContent());
-//
-//        $errorResponse = json_decode($response->getContent(), true);
-//        $this->assertArrayHasKey('error', $errorResponse);
-//    }
-//
-//    public function testShopByCreator(): void
-//    {
-//        $userId = $this->createTestUser();
-//        $shop = new Shop();
-//        $shop->setName('Test Shop');
-//        $shop->setCreatorId($userId);
-//        self::$entityManager->persist($shop);
-//        self::$entityManager->flush();
-//
-//        $creatorEmail = base64_encode('testuser' . uniqid() . '@example.com');
-//        self::$client->request('GET', '/api/private/shop/user/' . $creatorEmail, [], [], $this->getAuthHeaders());
-//
-//        $response = self::$client->getResponse();
-//        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), 'Failed to get shop by creator: ' . $response->getContent());
-//        $this->assertJson($response->getContent());
-//
-//        $shopData = json_decode($response->getContent(), true);
-//        $this->assertArrayHasKey('id', $shopData);
-//    }
-//
-//    public function testGetShopCustomers(): void
-//    {
-//        $userId = $this->createTestUser();
-//        $shop = new Shop();
-//        $shop->setName('Test Shop');
-//        $shop->setCreatorId($userId);
-//        self::$entityManager->persist($shop);
-//        self::$entityManager->flush();
-//
-//        $customer = new User();
-//        $customer->setEmail('customer' . uniqid() . '@example.com');
-//        $customer->setPassword('password');
-//        $customer->setShopId($shop->getId());
-//        self::$entityManager->persist($customer);
-//        self::$entityManager->flush();
-//
-//        self::$client->request('GET', '/api/private/shop/' . $shop->getId() . '/customers', [], [], $this->getAuthHeaders());
-//
-//        $response = self::$client->getResponse();
-//        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), 'Failed to get shop customers: ' . $response->getContent());
-//        $this->assertJson($response->getContent());
-//
-//        $customers = json_decode($response->getContent(), true);
-//        $this->assertIsArray($customers);
-//        $this->assertNotEmpty($customers);
-//    }
+        $data = [
+            'name' => 'New Shop',
+            'creator' => $userId,
+        ];
+
+        self::$client->request(
+            'POST',
+            '/api/private/shop/new',
+            [],
+            [],
+            $this->getAuthHeaders(),
+            json_encode($data)
+        );
+
+        $response = self::$client->getResponse();
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), 'Failed to create shop: ' . $response->getContent());
+        $this->assertJson($response->getContent());
+
+        $shop = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('id', $shop);
+        $shopId = $shop['id'];
+
+        $entityManager = self::$client->getContainer()->get('doctrine')->getManager();
+        $shopToDelete = $entityManager->getRepository(Shop::class)->find($shopId);
+
+        if ($shopToDelete) {
+            $entityManager->remove($shopToDelete);
+            $entityManager->flush();
+        }
+    }
+
+    public function testCreateShopConflict(): void
+    {
+        // Créer un utilisateur de test
+        $userId = $this->createTestUser();
+
+        // Nom de la boutique à créer (et à utiliser pour provoquer le conflit)
+        $shopName = 'Conflicting Shop Name';
+
+        // Créer la première boutique avec ce nom
+        $initialData = [
+            'name' => $shopName,
+            'creator' => $userId,
+        ];
+
+        self::$client->request(
+            'POST',
+            '/api/private/shop/new',
+            [],
+            [],
+            $this->getAuthHeaders(),
+            json_encode($initialData)
+        );
+
+        $initialResponse = self::$client->getResponse();
+        $this->assertEquals(Response::HTTP_OK, $initialResponse->getStatusCode(), 'Failed to create initial shop: ' . $initialResponse->getContent());
+        $this->assertJson($initialResponse->getContent());
+
+        // Décoder la réponse pour obtenir l'ID de la boutique initiale
+        $initialShop = json_decode($initialResponse->getContent(), true);
+        $this->assertArrayHasKey('id', $initialShop);
+        $shopId = $initialShop['id'];
+
+        // Tenter de créer une autre boutique avec le même nom pour provoquer un conflit
+        self::$client->request(
+            'POST',
+            '/api/private/shop/new',
+            [],
+            [],
+            $this->getAuthHeaders(),
+            json_encode($initialData)
+        );
+
+        $response = self::$client->getResponse();
+        $this->assertEquals(Response::HTTP_CONFLICT, $response->getStatusCode(), 'Expected conflict but got: ' . $response->getContent());
+        $this->assertJson($response->getContent());
+
+        $errorResponse = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('error', $errorResponse);
+
+        // Supprimer la boutique initiale après le test
+        $entityManager = self::$client->getContainer()->get('doctrine')->getManager();
+        $shopToDelete = $entityManager->getRepository(Shop::class)->find($shopId);
+
+        if ($shopToDelete) {
+            $entityManager->remove($shopToDelete);
+            $entityManager->flush();
+        }
+    }
+
+    public function testShopByCreator(): void
+    {
+        // Créer un utilisateur de test
+        $userId = $this->createTestUser();
+
+        // Récupérer l'utilisateur pour obtenir son email
+        $user = self::$entityManager->getRepository(User::class)->find($userId);
+        $this->assertNotNull($user, 'Test user not found');
+
+        // Générer un numéro SIRET valide (14 chiffres)
+        $siretNumber = str_pad((string)random_int(1, 99999999999999), 14, '0', STR_PAD_LEFT);
+
+        // Créer une boutique pour cet utilisateur avec le numéro SIRET
+        $shop = new Shop();
+        $shop->setName('Test Shop');
+        $shop->setCreatorId($userId);
+        $shop->setSiretNumber($siretNumber);
+        self::$entityManager->persist($shop);
+        self::$entityManager->flush();
+
+        // Encoder l'email de l'utilisateur en base64
+        $creatorEmail = base64_encode($user->getEmail());
+
+        // Faire une requête GET pour obtenir la boutique par le créateur (l'utilisateur)
+        self::$client->request('GET', '/api/private/shop/user/' . $creatorEmail, [], [], $this->getAuthHeaders());
+
+        // Vérifier que la réponse a le statut HTTP 200 OK
+        $response = self::$client->getResponse();
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), 'Failed to get shop by creator: ' . $response->getContent());
+        $this->assertJson($response->getContent());
+
+        // Vérifier que la réponse contient l'ID de la boutique
+        $shopData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('id', $shopData);
+
+        // Nettoyer en supprimant la boutique créée
+        self::$entityManager->remove($shop);
+        self::$entityManager->flush();
+    }
+
+    public function testGetShopCustomers(): void
+    {
+        // Créer un utilisateur de test
+        $userId = $this->createTestUser();
+
+        // Générer un numéro SIRET valide (14 chiffres)
+        $siretNumber = str_pad((string)random_int(1, 99999999999999), 14, '0', STR_PAD_LEFT);
+
+        // Créer une boutique pour cet utilisateur avec le numéro SIRET
+        $shop = new Shop();
+        $shop->setName('Test Shop');
+        $shop->setCreatorId($userId);
+        $shop->setSiretNumber($siretNumber);
+        self::$entityManager->persist($shop);
+        self::$entityManager->flush();
+
+        // Créer un client (utilisateur) associé à la boutique
+        $customer = $this->createTestUser();
+        $customerUser = self::$entityManager->getRepository(User::class)->find($customer);
+        $customerUser->setShopId($shop->getId());
+        self::$entityManager->persist($customerUser);
+        self::$entityManager->flush();
+
+        // Faire une requête GET pour obtenir les clients de la boutique
+        self::$client->request('GET', '/api/private/shop/' . $shop->getId() . '/customers', [], [], $this->getAuthHeaders());
+
+        // Vérifier que la réponse a le statut HTTP 200 OK
+        $response = self::$client->getResponse();
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), 'Failed to get shop customers: ' . $response->getContent());
+        $this->assertJson($response->getContent());
+
+        // Vérifier que la réponse contient les clients
+        $customersData = json_decode($response->getContent(), true);
+        $this->assertIsArray($customersData, 'Expected customers array');
+        $this->assertCount(1, $customersData, 'Expected 1 customer');
+        $this->assertEquals('', $customersData[0]['password'], 'Password should be empty');
+
+        // Nettoyer en supprimant la boutique et les utilisateurs créés
+        self::$entityManager->remove($customerUser);
+        self::$entityManager->remove($shop);
+        self::$entityManager->flush();
+    }
+
+    public function testGetShopCustomersShopNotFound(): void
+    {
+        // ID invalide pour la boutique
+        $invalidShopId = 999999;
+
+        // Faire une requête GET pour obtenir les clients d'une boutique inexistante
+        self::$client->request('GET', '/api/private/shop/' . $invalidShopId . '/customers', [], [], $this->getAuthHeaders());
+
+        // Vérifier que la réponse a le statut HTTP 404 NOT FOUND
+        $response = self::$client->getResponse();
+        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode(), 'Expected 404 for non-existing shop');
+        $this->assertJson($response->getContent());
+
+        // Vérifier que la réponse contient l'erreur
+        $errorResponse = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('error', $errorResponse);
+        $this->assertEquals('Shop not found', $errorResponse['error']);
+    }
 }
