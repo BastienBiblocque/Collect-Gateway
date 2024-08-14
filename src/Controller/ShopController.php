@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\ShopDTO;
 use App\Entity\Shop;
+use App\Repository\OrderRepository;
 use App\Repository\ShopRepository;
 use App\Repository\UserRepository;
 use App\service\ApiMicroservice\DeploymentService;
@@ -131,6 +132,26 @@ class ShopController extends AbstractController
 
         return $this->json($customers, 200);
     }
+
+    #[Route('/stats', name: 'order_byshop', methods: ['GET'])]
+    public function getShopStats(string $shopId, OrderRepository $orderRepository): JsonResponse
+    {
+        $orders = $orderRepository->findBy(['shopId' => $shopId, 'status' => ['payed', 'send']]);
+//        $queryBuilder = $orderRepository->createQueryBuilder('o')
+//            ->where('o.shopId = :shopId')
+//            ->andWhere('o.status NOT IN (:excludedStatus)')
+//            ->setParameter('shopId', $shopId)
+//            ->setParameter('excludedStatus', ['open']);
+//
+//        $orders = $queryBuilder->getQuery()->getResult();
+        $totalOrders = count($orders);
+
+        return $this->json(
+            $stats = [
+                "totalOrders" => $totalOrders,
+            ],
+            Response::HTTP_OK
+        );
 
     #[Route('/{shopId}/owner', name: 'user_getOne', methods: ['GET'])]
     public function getOwnerData(string $shopId, UserRepository $userRepository, ShopRepository $shopRepository): JsonResponse
