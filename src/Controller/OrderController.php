@@ -56,6 +56,13 @@ class OrderController extends AbstractController
         return $this->json($orders, Response::HTTP_OK);
     }
 
+    #[Route('/paid', name: 'order_byshop', methods: ['GET'])]
+    public function getPaidOrderByShop(string $shopId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository, UserRepository $userRepository): JsonResponse
+    {
+        $orders = $orderRepository->findBy(['shopId' => $shopId, 'status' => 'payed']);
+        return $this->json($orders, Response::HTTP_OK);
+    }
+
     #[Route('/{userId}', name: 'order_index', methods: ['GET'])]
     public function getByUser(string $shopId, string $userId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
     {
