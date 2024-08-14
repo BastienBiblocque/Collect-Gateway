@@ -6,19 +6,18 @@ namespace App\Controller;
 
 use App\DTO\ShopDTO;
 use App\Entity\Shop;
-use App\Repository\OrderRepository;
 use App\Repository\ShopRepository;
 use App\Repository\UserRepository;
+use App\service\ApiMicroservice\DeploymentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use function PHPUnit\Framework\isEmpty;
 
 #[Route('/api/private/shop')]
 class ShopController extends AbstractController
@@ -30,6 +29,33 @@ class ShopController extends AbstractController
         $shops = $shopRepository->findAll();
 
         return $this->json($shops, Response::HTTP_OK);
+    }
+
+    #[Route('/deploy/{shopId}', name: 'deploy_shop', methods: ['GET'])]
+
+    public function deploy(int $shopId, ShopRepository $shopRepository, DeploymentService $deploymentService): Response
+    {
+        try {
+            $shop = $shopRepository->find($shopId);
+            if (!$shop) {
+                return new Response('Shop not found', Response::HTTP_NOT_FOUND);
+            }
+
+            $content = $deploymentService->postRequest('/deploy', $shop->toArray());
+
+            // Décoder le contenu JSON si nécessaire
+            $data = json_decode($content, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return new Response('Failed to decode JSON response', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            return $this->json($data, Response::HTTP_OK);
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            return new Response('Request failed: ' . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (\Exception $e) {
+            return new Response('An error occurred: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
