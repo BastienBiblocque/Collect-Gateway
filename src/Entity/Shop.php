@@ -49,6 +49,8 @@ class Shop
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $theme = null;
 
+    private ?User $owner = null;
+
 
     public function getId(): ?int
     {
@@ -153,5 +155,15 @@ class Shop
             'siretNumber' => $this->siretNumber,
             'theme' => $this->theme,
         ];
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): void
+    {
+        $this->owner = $owner;
     }
 }

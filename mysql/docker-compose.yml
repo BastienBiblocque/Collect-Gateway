@@ -27,6 +27,19 @@ services:
     networks:
       - mysql-network
 
+  mysql-ms-payment:
+    image: mysql:latest
+    container_name: mysql_db3_payment
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword3
+      MYSQL_DATABASE: database_ms_payment
+      MYSQL_USER: user3
+      MYSQL_PASSWORD: password3
+    ports:
+      - "3308:3306"
+    networks:
+      - mysql-network
+
 networks:
   mysql-network:
     driver: bridge

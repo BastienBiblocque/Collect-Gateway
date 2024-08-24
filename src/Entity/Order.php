@@ -30,6 +30,9 @@ class Order
     private ?string $billingId = null;
 
     #[ORM\Column(length: 255)]
+    private ?string $stripeId = null;
+
+    #[ORM\Column(length: 255)]
     private string $shopId;
 
     #[ORM\Column()]
@@ -41,6 +44,7 @@ class Order
     private ?Address $deliveryAddress = null;
 
     private ?User $user = null;
+    private ?string $stripePaymentIntent = null;
 
 
     public function getId(): ?int
@@ -167,4 +171,26 @@ class Order
     {
         $this->user = $user;
     }
+
+    public function getStripeId(): ?string
+    {
+        return $this->stripeId;
+    }
+
+    public function setStripeId(?string $stripeId): void
+    {
+        $this->stripeId = $stripeId;
+    }
+
+    public function getStripePaymentIntent(): ?string
+    {
+        return $this->stripePaymentIntent;
+    }
+
+    public function setStripePaymentIntent(?string $stripePaymentIntent): void
+    {
+        $this->stripePaymentIntent = $stripePaymentIntent;
+    }
+
+
 }

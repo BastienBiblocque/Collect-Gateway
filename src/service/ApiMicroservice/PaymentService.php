@@ -5,7 +5,7 @@ namespace App\service\ApiMicroservice;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
-class DeploymentService
+class PaymentService
 {
     private $client;
     private $microserviceUrl;
@@ -13,15 +13,15 @@ class DeploymentService
     public function __construct()
     {
         $this->client = new Client();
-        $this->microserviceUrl = $_ENV['URL_MICROSERVICE_DEPLOYMENT'];
+        $this->microserviceUrl = $_ENV['URL_MICROSERVICE_PAYMENT'];
     }
 
     public function postRequest(string $endpoint, array $entities)
     {
         try {
             $client = new Client();
-            $response = $client->post('http://127.0.0.1:8001' . $endpoint, [
-                'json' => $entities, // Utilisation des données du shop
+            $response = $client->post('http://127.0.0.1:8002' . $endpoint, [
+                'json' => $entities,
             ]);
 
             $body = $response->getBody();

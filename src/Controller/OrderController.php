@@ -12,6 +12,7 @@ use App\Repository\CartRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
+use App\service\ApiMicroservice\PaymentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -97,18 +98,22 @@ class OrderController extends AbstractController
 
 
     #[Route('/{userId}/{orderId}', name: 'order_getOne', methods: ['GET'])]
-    public function getOne(string $shopId, string $userId , string $orderId, OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
+    public function getOne(string $shopId, string $userId , string $orderId, PaymentService $paymentService,OrderRepository $orderRepository, CartRepository $cartRepository, CartProductRepository $cartProductRepository, AddressRepository $addressRepository): JsonResponse
     {
         $order = $orderRepository->findOneBy(['shopId' => $shopId, 'userId' =>  base64_decode($userId), 'id' => $orderId]);
 
         $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
 
         $cartProducts = $cartProductRepository->findBy(['cartId' => $cart->getId()]);
+        $total = 0;
 
         $cartDetails = [];
         foreach ($cartProducts as $cartProduct) {
             $cartDetails[] = $cartProduct;
+            $total += $cartProduct->getPrice();
         }
+
+        $cart->setTotalPrice($total);
 
         $cart->setProducts($cartDetails);
 
@@ -116,6 +121,13 @@ class OrderController extends AbstractController
 
         $order->setDeliveryAddress($addressRepository->find($order->getDevelieryId()));
         $order->setBillingAddress($addressRepository->find($order->getBillingId()));
+
+
+
+        $content = $paymentService->postRequest('/create-payment-intent', ['amount' => $cart->getTotalPrice() * 100]);
+        $decodedJson = json_decode($content, true);
+
+        $order->setStripePaymentIntent($decodedJson['clientSecret']);
 
         return $this->json($order, Response::HTTP_OK);
     }
@@ -132,6 +144,7 @@ class OrderController extends AbstractController
         $order->setCartId($data['cartId']);
         $order->setBillingId($data['billing']);
         $order->setDevelieryId($data['delivery']);
+        $order->setStripeId('');
         $order->setCreatedAt(new \DateTime());
         $entityManager->persist($order);
 
@@ -141,10 +154,13 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{userId}/{orderId}/payed', name: 'order_pay', methods: ['PUT'])]
-    public function payOrder(string $shopId, string $userId, string $orderId, OrderRepository $orderRepository, EntityManagerInterface $entityManager, CartRepository $cartRepository, CartProductRepository $cartProductRepository, ProductRepository $productRepository): JsonResponse
+    public function payOrder(string $shopId, string $userId, string $orderId, Request $request ,OrderRepository $orderRepository, EntityManagerInterface $entityManager, CartRepository $cartRepository, CartProductRepository $cartProductRepository, ProductRepository $productRepository): JsonResponse
     {
+        $data = json_decode($request->getContent(), true);
+
         $order = $orderRepository->findOneBy(['userId' => base64_decode($userId), 'shopId' => $shopId, 'id' => $orderId]);
         $order->setStatus('payed');
+        $order->setStripeId($data['stripeIntent']);
 
         $cart = $cartRepository->findOneBy(['id' => $order->getCartId()]);
         $cartProducts = $cartProductRepository->findBy(['cartId' => $cart->getId()]);
